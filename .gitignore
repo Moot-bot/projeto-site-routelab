@@ -1,0 +1,5 @@
+data/dados.xlsx
+data/*.xlsx
+__pycache__/
+*.pyc
+.env

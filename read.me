@@ -1,0 +1,23 @@
+# Projeto de Consulta de Rotas Logísticas
+
+Este projeto permite consultar rotas logísticas entre cidades, comparando custos com e sem BR-319, tempo, distância, emissão de CO₂ e competitividade com armadores.
+
+## Tecnologias utilizadas
+- Backend: FastAPI (Python)
+- Frontend: HTML + JavaScript
+- Dados: Excel processado em memória
+
+## Como executar
+
+1. Instale as dependências:
+   ```bash
+   pip install -r requirements.txt
+2. Inicie o Servidor 
+uvicorn app.main:app --reload
+3. Acesse no navegador:
+Interface: http://localhost:8000/static/index.html
+Documentação da API: http://localhost:8000/docs
+4.Estrutura do projeto
+/data: Arquivo Excel original
+/static: Interface web
+/app: Código da API
