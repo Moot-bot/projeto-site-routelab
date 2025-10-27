@@ -15,13 +15,21 @@
       "src": "/api/(.*)",
       "dest": "/server.js"
     },
-     {
+    {
+      "src": "/cities",
+      "dest": "/server.js"
+    },
+    {
+      "src": "/health",
+      "dest": "/server.js"
+    },
+    {
       "src": "/competitividade",
       "dest": "/server.js"
     },
     {
       "src": "/(.*)",
-      "dest": "/static/$1"
+      "dest": "/server.js"  
     }
   ]
 }
