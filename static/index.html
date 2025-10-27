@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Consultor de Rotas Logísticas</title>
+  <title>Modelo de Competitividade da Cabotagem</title>
 
   <!-- Leaflet (Mapa) -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -15,236 +15,344 @@
   <style>
     body {
       font-family: 'Segoe UI', sans-serif;
-      margin: 40px;
+      margin: 0;
+      padding: 0;
       background: #f5f7fa;
       color: #333;
     }
-    .container {
-      max-width: 600px;
-      margin: auto;
-      background: white;
-      padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+
+    .header {
+      background: #007bff;
+      color: white;
+      text-align: center;
+      padding: 10px 0;
+      font-size: 20px;
+      font-weight: bold;
     }
+
+    .container {
+      display: grid;
+      grid-template-columns: 1fr 2fr 1fr;
+      gap: 10px;
+      padding: 10px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .col-blue {
+      background: #1e6dbb;
+      color: white;
+      padding: 15px;
+      border-radius: 5px;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .col-green {
+      background: #d4f0d4;
+      padding: 15px;
+      border-radius: 5px;
+      font-size: 14px;
+    }
+
+    .col-purple {
+      background: #e6e6fa;
+      padding: 0;
+      border-radius: 5px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .col-purple #map {
+      height: 450px;
+      width: 100%;
+      border: none;
+      flex-grow: 1;
+    }
+
+    .footer-contact {
+      background: #28a745;
+      color: white;
+      text-align: center;
+      padding: 8px;
+      font-size: 14px;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    h2 {
+      color: #000;
+      margin-top: 20px;
+      margin-bottom: 10px;
+      font-size: 18px;
+      font-weight: bold;
+    }
+
     .input-container {
       display: flex;
-      gap: 12px;
-      margin-bottom: 12px;
+      gap: 10px;
+      margin-bottom: 15px;
     }
+
     .input-container input {
       flex: 1;
-      min-width: 0;
-      padding: 12px;
+      padding: 10px;
       border: 1px solid #ddd;
       border-radius: 5px;
-      font-size: 16px;
+      font-size: 14px;
+      background: yellow;
     }
+
     button {
-      padding: 12px;
-      margin: 6px 0;
+      padding: 8px 12px;
+      margin: 5px 0;
       width: 100%;
       border: none;
       border-radius: 5px;
-      font-size: 16px;
+      font-size: 14px;
       cursor: pointer;
     }
-    #consultar { background: #3498db; color: white; }
-    #consultar:hover { background: #2980b9; }
-    #limpar { background: #95a5a6; color: white; }
+
+    #consultar { background: #007bff; color: white; }
+    #consultar:hover { background: #0056b3; }
+    #limpar { background: #6c757d; color: white; }
     #salvar-grafico { 
-      background: #2ecc71; 
+      background: #28a745; 
       color: white; 
-      margin-top: 12px; 
+      margin-top: 10px; 
       display: none;
     }
 
-    #resultado {
-      margin-top: 20px;
-      padding: 15px;
-      background: #e8f4f8;
-      border-left: 4px solid #3498db;
-      border-radius: 5px;
-      display: none;
-    }
-    .info-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 10px;
-      margin-top: 10px;
-    }
-    .info-item {
-      background: #fff;
-      padding: 10px;
-      border-radius: 5px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-    }
-    .info-item label {
-      font-weight: bold;
-      font-size: 12px;
-      color: #7f8c8d;
-    }
-    .info-item span {
-      font-size: 14px;
-    }
-    .emissao-row {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-      gap: 10px;
-      margin-top: 15px;
-    }
-    .emissao-box {
+    .armador-card {
       background: #fff;
       padding: 10px;
       border-radius: 5px;
       box-shadow: 0 1px 3px rgba(0,0,0,0.1);
       text-align: center;
+      margin: 5px;
+      min-height: 80px;
     }
+
+    .armador-card.competitivo {
+      background: #d4f0d4;
+      border: 2px solid #28a745;
+    }
+
+    .armador-card.nao-competitivo {
+      background: #ffebee;
+      border: 2px solid #f44336;
+      color: #c62828;
+    }
+
+    .armador-icon {
+      font-size: 24px;
+      margin-bottom: 5px;
+    }
+
+    .chart-container {
+      margin-top: 15px;
+      height: 250px;
+      position: relative;
+    }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .info-item {
+      background: #fff;
+      padding: 8px;
+      border-radius: 5px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      text-align: center;
+    }
+
+    .info-item label {
+      font-weight: bold;
+      font-size: 12px;
+      color: #7f8c8d;
+    }
+
+    .info-item span {
+      font-size: 14px;
+    }
+
+    .emissao-box {
+      background: #fff;
+      padding: 8px;
+      border-radius: 5px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      text-align: center;
+      margin: 5px;
+    }
+
     .emissao-box label {
       font-weight: bold;
       font-size: 12px;
       color: #7f8c8d;
       display: block;
     }
+
     .emissao-box span {
       font-size: 14px;
     }
-    .chart-container {
+
+    .visitante-sep {
       margin-top: 20px;
-      height: 300px;
-      position: relative;
-    }
-    /* Linha temporária para debug visual do canvas */
-    #emissionsChart {
-      border: 1px solid #eee;
-    }
-    #map {
-      height: 250px;
-      border-radius: 8px;
-      margin-top: 20px;
-      display: none;
-    }
-    .competitividade-navios {
-      margin-top: 25px;
-      padding: 18px;
-      background: white;
-      border-radius: 10px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-      border-top: 3px solid #3498db;
-    }
-    .competitividade-navios h4 {
-      margin-top: 0;
-      color: #2c3e50;
-      font-size: 18px;
-    }
-    .navios-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
-      gap: 12px;
-      margin-top: 12px;
-    }
-    .navio-card {
-      text-align: center;
-      padding: 14px 8px;
-      border-radius: 8px;
+      padding-top: 10px;
+      border-top: 2px solid rgba(255,255,255,0.3);
       font-weight: bold;
-      transition: transform 0.2s;
     }
-    .navio-card.competitivo {
-      background-color: #e8f5e9;
-      border: 2px solid #4caf50;
-      color: #2e7d32;
-    }
-    .navio-card.nao-competitivo {
-      background-color: #ffebee;
-      border: 2px solid #f44336;
-      color: #c62828;
-    }
-    .navio-icon {
-      font-size: 28px;
-      margin-bottom: 6px;
-    }
-    .navio-nome {
-      font-size: 14px;
-      margin-bottom: 4px;
-    }
-    .navio-status {
-      font-size: 12px;
-      opacity: 0.9;
-    }
-    .footer {
+
+    .dados-titulo {
+      font-size: 16px;
+      font-weight: bold;
+      color: #000;
+      margin-top: 15px;
+      margin-bottom: 5px;
       text-align: center;
+    }
+
+    .coordenadas {
       font-size: 12px;
-      color: #7f8c8d;
-      margin-top: 25px;
+      color: #555;
+      margin: 5px 0;
+      padding: 5px;
+      background: #f9f9f9;
+      border-radius: 5px;
+      text-align: center;
+    }
+
+    /* Estilização do mapa */
+    .leaflet-container {
+      background: #e6e6fa;
+      border: 1px solid #ccc;
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>🔍 Consultor de Rotas Logísticas</h1>
-
-    <div class="input-container">
-      <input list="cidades" id="origem" placeholder="Origem" />
-      <input list="cidades" id="destino" placeholder="Destino" />
-    </div>
-
-    <button id="consultar" onclick="consultar()">Consultar Rota</button>
-    <button id="limpar" onclick="limpar()">Limpar</button>
-
-    <div id="resultado"></div>
-    <button id="salvar-grafico" onclick="salvarGrafico()">📥 Salvar Gráfico</button>
-    <div id="map"></div>
-
-    <div class="footer">
-      👥 Visitantes nesta sessão: <span id="visitantes">1</span>
-    </div>
-
-    <datalist id="cidades"></datalist>
+  <div class="header">
+    Modelo de Competitividade da Cabotagem em relação ao Modal Rodoviário
   </div>
 
+  <div class="container">
+    <!-- Coluna 1: Informações e Visitantes -->
+    <div class="col-blue">
+      <p>
+        Este aplicativo é resultado da pesquisa publicada no artigo 
+        <strong>"Brazilian maritime containerized cabotage competitiveness assessment based on a multimodal super network"</strong>. 
+        O artigo está disponível em <a href="https://doi.org/10.1016/j.jtrangeo.2024.104062" style="color:white; text-decoration:underline;">https://doi.org/10.1016/j.jtrangeo.2024.104062</a>.
+      </p>
+      <br>
+      <p>
+        Com objetivo promover o modal Cabotagem em sua região de competitividade, este aplicativo verifica se o Cabotagem é mais competitiva que o modal Rodoviário para as 637 Cidades com mais de 50 mil habitantes.
+      </p>
+      <br>
+      <p>
+        São considerados o frete base, o custo de inventário em trânsito e o custo de emissão de CO₂ equivalente.
+      </p>
+
+      <div class="visitante-sep">
+        <h2>Agradecemos sua visita. Você é o Visitante número:</h2>
+        <div style="font-size: 24px; font-weight: bold; margin-top: 5px;">
+          <span id="visitantes">0</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Coluna 2: Formulário, Resultado, Gráfico -->
+    <div class="col-green">
+      <h2>🔍 Selecione as cidades de origem e destino</h2>
+      <div class="input-container">
+        <input list="cidades" id="origem" placeholder="Origem" />
+        <input list="cidades" id="destino" placeholder="Destino" />
+      </div>
+
+      <button id="consultar" onclick="consultar()">Consultar Rota</button>
+      <button id="limpar" onclick="limpar()">Limpar</button>
+
+      <div id="resultado" style="display:none;">
+        <div class="dados-titulo">📊 Dados da Rota</div>
+        <div class="info-grid">
+          <div class="info-item">
+            <label>Distância (km)</label>
+            <span id="distancia">-</span>
+          </div>
+          <div class="info-item">
+            <label>Tempo (horas)</label>
+            <span id="tempo">-</span>
+          </div>
+          <div class="info-item">
+            <label>Emissão CO₂ — Padrão</label>
+            <span id="emissao_padrao">-</span> <small>kg</small>
+          </div>
+        </div>
+
+        <div class="coordenadas">
+          <strong>Origem:</strong> <span id="origem_lat">-</span>, <span id="origem_lon">-</span><br>
+          <strong>Destino:</strong> <span id="destino_lat">-</span>, <span id="destino_lon">-</span>
+        </div>
+
+        <h2>🚢 Competitividade dos Armadores</h2>
+        <div class="info-grid">
+          <div class="armador-card" id="armador1">
+            <div class="armador-icon">✅</div>
+            <div>Armador 1</div>
+            <div id="status1">Competitivo</div>
+          </div>
+          <div class="armador-card" id="armador2">
+            <div class="armador-icon">✅</div>
+            <div>Armador 2</div>
+            <div id="status2">Competitivo</div>
+          </div>
+          <div class="armador-card" id="armador3">
+            <div class="armador-icon">✅</div>
+            <div>Armador 3</div>
+            <div id="status3">Competitivo</div>
+          </div>
+          <div class="armador-card" id="armador4">
+            <div class="armador-icon">✅</div>
+            <div>Armador 4</div>
+            <div id="status4">Competitivo</div>
+          </div>
+        </div>
+
+        <h2>📊 Comparação de Emissões de CO₂eq (ton)</h2>
+        <div class="chart-container">
+          <canvas id="emissionsChart"></canvas>
+        </div>
+      </div>
+
+      <button id="salvar-grafico" onclick="salvarGrafico()">📥 Salvar Gráfico</button>
+    </div>
+
+    <!-- Coluna 3: Mapa + Contato -->
+    <div class="col-purple">
+      <div id="map"></div>
+      <div class="footer-contact">
+        Contato: costa@usp.br
+      </div>
+    </div>
+  </div>
+
+  <datalist id="cidades"></datalist>
+
   <script>
-    // Contador de visitantes (por sessão)
-    let visitas = parseInt(sessionStorage.getItem('visitas') || '0') + 1;
-    sessionStorage.setItem('visitas', visitas);
-    document.getElementById('visitantes').textContent = visitas;
+    // Contador total de visitantes
+    let totalVisitas = parseInt(localStorage.getItem('totalVisitas') || '0') + 1;
+    localStorage.setItem('totalVisitas', totalVisitas);
+    document.getElementById('visitantes').textContent = totalVisitas;
 
     const API_BASE = window.location.hostname === 'localhost' 
       ? 'http://localhost:8000' 
       : 'https://projeto-site-routelab.onrender.com';
 
     let allCities = [];
-    let cityCoords = {};
 
-    // Carregar coordenadas do arquivo CORRETO: cidade.csv
-    fetch('https://github.com/Moot-bot/Routelab/releases/download/v1.1/cidade.csv')
-      .then(response => {
-        if (!response.ok) throw new Error('Falha ao carregar cidade.csv');
-        return response.text();
-      })
-      .then(csvText => {
-        const lines = csvText.split('\n').slice(1); // pula cabeçalho
-        cityCoords = {};
-        lines.forEach(line => {
-          if (!line.trim()) return;
-          const parts = line.split(';');
-          if (parts.length >= 6) {
-            const [, nodeName, , , nodeLat, nodeLon] = parts;
-            if (nodeName && nodeLat && nodeLon) {
-              cityCoords[nodeName.trim()] = {
-                lat: parseFloat(nodeLat.replace(',', '.')),
-                lon: parseFloat(nodeLon.replace(',', '.'))
-              };
-            }
-          }
-        });
-        console.log('✅ Coordenadas carregadas:', Object.keys(cityCoords).length);
-      })
-      .catch(err => {
-        console.error('Erro ao carregar cidade.csv:', err);
-      });
-
-    // Carregar lista de cidades para o datalist
     fetch(`${API_BASE}/cities`)
       .then(r => r.json())
       .then(data => {
@@ -277,17 +385,15 @@
     }
 
     async function consultar() {
-      const origem = document.getElementById('origem').value.trim();
-      const destino = document.getElementById('destino').value.trim();
-      const resultado = document.getElementById('resultado');
+      const origemInput = document.getElementById('origem').value.trim();
+      const destinoInput = document.getElementById('destino').value.trim();
 
-      if (!origem || !destino) {
+      if (!origemInput || !destinoInput) {
         alert("Por favor, preencha ambas as cidades.");
         return;
       }
 
-      resultado.style.display = 'block';
-      resultado.innerHTML = '<p>🔎 Buscando rota...</p>';
+      document.getElementById('resultado').style.display = 'block';
       document.getElementById('map').style.display = 'none';
       document.getElementById('salvar-grafico').style.display = 'none';
 
@@ -295,7 +401,7 @@
         const response = await fetch(`${API_BASE}/route`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ origin: origem, destination: destino })
+          body: JSON.stringify({ origin: origemInput, destination: destinoInput })
         });
 
         if (!response.ok) throw new Error(`Erro na API: ${response.status}`);
@@ -305,101 +411,57 @@
         if (data.success) {
           const info = data.info;
 
-          resultado.innerHTML = `
-            <h3 id="rota-titulo">Rota: ${origem} → ${destino}</h3>
+          // Atualizar dados visuais
+          document.getElementById('distancia').textContent = info.pathDistanceWithoutBR319?.toFixed(2) || '-';
+          document.getElementById('tempo').textContent = info.pathTransitTimeWithoutBR319?.toFixed(2) || '-';
+          document.getElementById('emissao_padrao').textContent = info.emissao_sem_br319?.toFixed(2) || '-';
 
-            <div class="info-grid">
-              <div class="info-item">
-                <label>Distância (km)</label>
-                <span>${info.pathDistanceWithoutBR319?.toFixed(2) || '-'} km</span>
-              </div>
-              <div class="info-item">
-                <label>Tempo (horas)</label>
-                <span>${info.pathTransitTimeWithoutBR319?.toFixed(2) || '-'} h</span>
-              </div>
-              <div class="info-item">
-                <label>Emissão CO₂ — Padrão</label>
-                <span>${info.emissao_sem_br319?.toFixed(2) || '-'} <small>kg</small></span>
-              </div>
-            </div>
+          // Atualizar coordenadas
+          document.getElementById('origem_lat').textContent = info.originLat != null ? info.originLat.toFixed(6) : '-';
+          document.getElementById('origem_lon').textContent = info.originLon != null ? info.originLon.toFixed(6) : '-';
+          document.getElementById('destino_lat').textContent = info.destinationLat != null ? info.destinationLat.toFixed(6) : '-';
+          document.getElementById('destino_lon').textContent = info.destinationLon != null ? info.destinationLon.toFixed(6) : '-';
 
-            <div class="emissao-row">
-              <div class="emissao-box">
-                <label>1</label>
-                <span>${info.emissao_al?.toFixed(2) || '-'} <small>kg</small></span>
-              </div>
-              <div class="emissao-box">
-                <label>2</label>
-                <span>${info.emissao_lg?.toFixed(2) || '-'} <small>kg</small></span>
-              </div>
-              <div class="emissao-box">
-                <label>3</label>
-                <span>${info.emissao_ml?.toFixed(2) || '-'} <small>kg</small></span>
-              </div>
-              <div class="emissao-box">
-                <label>4</label>
-                <span>${info.emissao_nc?.toFixed(2) || '-'} <small>kg</small></span>
-              </div>
-            </div>
+          // Atualizar competitividade dos armadores
+          const armadores = [
+            { id: 'armador1', statusId: 'status1', flag: info.isAL10 },
+            { id: 'armador2', statusId: 'status2', flag: info.isLG10 },
+            { id: 'armador3', statusId: 'status3', flag: info.isML10 },
+            { id: 'armador4', statusId: 'status4', flag: info.isNC10 }
+          ];
 
-            <h4 style="margin-top: 20px;">📊 Comparação de Emissões de CO₂</h4>
-            <div class="chart-container">
-              <canvas id="emissionsChart"></canvas>
-            </div>
-
-            <div class="competitividade-navios">
-              <h4>🚢 Competitividade dos Armadores</h4>
-              <p style="font-size: 13px; color: #555; margin-bottom: 12px;">
-                Um armador é competitivo se seu custo for até 10% menor que a rota padrão.
-              </p>
-              <div class="navios-grid">
-                <div class="navio-card ${info.isAL10 ? 'competitivo' : 'nao-competitivo'}">
-                  <div class="navio-icon">${info.isAL10 ? '✅' : '❌'}</div>
-                  <div class="navio-nome">Armador 1</div>
-                  <div class="navio-status">${info.isAL10 ? 'Competitivo' : 'Não competitivo'}</div>
-                </div>
-                <div class="navio-card ${info.isLG10 ? 'competitivo' : 'nao-competitivo'}">
-                  <div class="navio-icon">${info.isLG10 ? '✅' : '❌'}</div>
-                  <div class="navio-nome">Armador 2</div>
-                  <div class="navio-status">${info.isLG10 ? 'Competitivo' : 'Não competitivo'}</div>
-                </div>
-                <div class="navio-card ${info.isML10 ? 'competitivo' : 'nao-competitivo'}">
-                  <div class="navio-icon">${info.isML10 ? '✅' : '❌'}</div>
-                  <div class="navio-nome">Armador 3</div>
-                  <div class="navio-status">${info.isML10 ? 'Competitivo' : 'Não competitivo'}</div>
-                </div>
-                <div class="navio-card ${info.isNC10 ? 'competitivo' : 'nao-competitivo'}">
-                  <div class="navio-icon">${info.isNC10 ? '✅' : '❌'}</div>
-                  <div class="navio-nome">Armador 4</div>
-                  <div class="navio-status">${info.isNC10 ? 'Competitivo' : 'Não competitivo'}</div>
-                </div>
-              </div>
-            </div>
-          `;
+          armadores.forEach(a => {
+            const card = document.getElementById(a.id);
+            const status = document.getElementById(a.statusId);
+            if (a.flag) {
+              card.classList.add('competitivo');
+              card.classList.remove('nao-competitivo');
+              status.textContent = 'Competitivo';
+            } else {
+              card.classList.remove('competitivo');
+              card.classList.add('nao-competitivo');
+              status.textContent = 'Não competitivo';
+            }
+          });
 
           generateEmissionsChart(info);
-          highlightBestRoute(info);
           document.getElementById('salvar-grafico').style.display = 'block';
-          mostrarMapa(origem, destino);
+          mostrarMapa(info);
 
         } else {
-          resultado.innerHTML = `<p><strong>❌ ${data.message}</strong></p>`;
+          alert(data.message || "Rota não encontrada");
         }
 
       } catch (err) {
-        resultado.innerHTML = `<p><strong>❌ Erro: ${err.message}</strong></p>`;
+        alert(`Erro: ${err.message}`);
         console.error('Erro na consulta:', err);
       }
     }
 
-    // ✅ FUNÇÃO CORRIGIDA E ROBUSTA
     function generateEmissionsChart(info) {
       const ctx = document.getElementById('emissionsChart').getContext('2d');
-      
       const existingChart = Chart.getChart('emissionsChart');
-      if (existingChart) {
-        existingChart.destroy();
-      }
+      if (existingChart) existingChart.destroy();
 
       const values = [
         info.emissao_sem_br319 || 0,
@@ -414,9 +476,7 @@
         return isNaN(num) ? 0 : num;
       });
 
-      console.log("📊 Dados do gráfico:", safeValues);
-
-      const labels = ['Padrão', '1', '2', '3', '4'];
+      const labels = ['Rodoviário', '1', '2', '3', '4'];
       const colors = ['#ff6384', '#36a2eb', '#ffce56', '#4bc0c0', '#9966ff'];
 
       new Chart(ctx, {
@@ -451,7 +511,7 @@
               title: { display: true, text: 'Emissões de CO₂ (kg)' }
             },
             x: {
-              title: { display: true, text: 'Rotas' }
+              title: { display: true, text: 'Armadores' }
             }
           }
         }
@@ -466,30 +526,7 @@
       link.click();
     }
 
-    function highlightBestRoute(info) {
-      const values = [
-        info.emissao_sem_br319,
-        info.emissao_al,
-        info.emissao_lg,
-        info.emissao_ml,
-        info.emissao_nc
-      ];
-      const labels = ['Padrão', '1', '2', '3', '4'];
-      const validValues = values.map(v => (v && !isNaN(v)) ? v : Infinity);
-      const minIndex = validValues.indexOf(Math.min(...validValues));
-      const melhorRota = labels[minIndex];
-
-      if (minIndex >= 0 && isFinite(validValues[minIndex])) {
-        document.getElementById('rota-titulo').innerHTML += `
-          <small style="color:#28a745; font-weight:bold; display:block; margin-top:6px;">
-            (Menor emissão: ${melhorRota})
-          </small>
-        `;
-      }
-    }
-
-    // ✅ MAPA COM LINHA VISUAL ENTRE ORIGEM E DESTINO
-    function mostrarMapa(origem, destino) {
+    function mostrarMapa(info) {
       const mapDiv = document.getElementById('map');
       mapDiv.style.display = 'block';
 
@@ -502,40 +539,32 @@
         attribution: '© OpenStreetMap'
       }).addTo(map);
 
-      const origemCoord = cityCoords[origem];
-      const destinoCoord = cityCoords[destino];
-      let boundsArray = [];
+      const boundsArray = [];
 
-      if (origemCoord) {
-        L.marker([origemCoord.lat, origemCoord.lon])
-          .bindPopup(`<b>Origem:</b> ${origem}<br>(${origemCoord.lat.toFixed(4)}, ${origemCoord.lon.toFixed(4)})`)
+      if (info.originLat != null && info.originLon != null) {
+        L.marker([info.originLat, info.originLon])
+          .bindPopup(`<b>Origem</b><br>(${info.originLat.toFixed(4)}, ${info.originLon.toFixed(4)})`)
           .addTo(map);
-        boundsArray.push([origemCoord.lat, origemCoord.lon]);
+        boundsArray.push([info.originLat, info.originLon]);
       }
 
-      if (destinoCoord) {
-        L.marker([destinoCoord.lat, destinoCoord.lon])
-          .bindPopup(`<b>Destino:</b> ${destino}<br>(${destinoCoord.lat.toFixed(4)}, ${destinoCoord.lon.toFixed(4)})`)
+      if (info.destinationLat != null && info.destinationLon != null) {
+        L.marker([info.destinationLat, info.destinationLon])
+          .bindPopup(`<b>Destino</b><br>(${info.destinationLat.toFixed(4)}, ${info.destinationLon.toFixed(4)})`)
           .addTo(map);
-        boundsArray.push([destinoCoord.lat, destinoCoord.lon]);
+        boundsArray.push([info.destinationLat, info.destinationLon]);
       }
 
-      if (origemCoord && destinoCoord) {
-        const polyline = L.polyline([
-          [origemCoord.lat, origemCoord.lon],
-          [destinoCoord.lat, destinoCoord.lon]
-        ], {
+      if (boundsArray.length === 2) {
+        L.polyline(boundsArray, {
           color: '#e74c3c',
           weight: 3,
           opacity: 0.8,
           dashArray: '8,6'
         }).addTo(map);
-
-        const bounds = polyline.getBounds().pad(0.2);
-        map.fitBounds(bounds);
+        map.fitBounds(L.latLngBounds(boundsArray).pad(0.2));
       } else if (boundsArray.length > 0) {
-        const bounds = L.latLngBounds(boundsArray).pad(0.3);
-        map.fitBounds(bounds);
+        map.fitBounds(L.latLngBounds(boundsArray).pad(0.3));
       }
 
       window.rotaMap = map;
