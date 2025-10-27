@@ -292,10 +292,7 @@
           </div>
         </div>
 
-        <div class="coordenadas">
-          <strong>Origem:</strong> <span id="origem_lat">-</span>, <span id="origem_lon">-</span><br>
-          <strong>Destino:</strong> <span id="destino_lat">-</span>, <span id="destino_lon">-</span>
-        </div>
+      
 
         <h2>🚢 Competitividade dos Armadores</h2>
         <div class="info-grid">
@@ -416,7 +413,7 @@
           document.getElementById('tempo').textContent = info.pathTransitTimeWithoutBR319?.toFixed(2) || '-';
           document.getElementById('emissao_padrao').textContent = info.emissao_sem_br319?.toFixed(2) || '-';
 
-         
+          
           // Atualizar competitividade dos armadores
           const armadores = [
             { id: 'armador1', statusId: 'status1', flag: info.isAL10 },
