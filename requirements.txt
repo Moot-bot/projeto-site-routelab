@@ -2,5 +2,5 @@ fastapi
 uvicorn
 pandas
 requests
-jinja2
+jinja2>=3.0.0
 numpy
