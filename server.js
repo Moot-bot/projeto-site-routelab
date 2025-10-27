@@ -64,46 +64,53 @@ app.get('/api/cidades', async (req, res) => {
 });
 
 
-// ✅ ROTA COMPETITIVIDADE - PROXY PARA BACKEND REAL  
+// ✅ ROTA COMPETITIVIDADE - COM TRATAMENTO COMPLETO
 app.get('/api/competitividade/:cidade', async (req, res) => {
   try {
     const { cidade } = req.params;
-    console.log(`📞 Rota /api/competitividade/${cidade} - conectando com backend real`);
+    console.log(`📞 Buscando dados reais para: ${cidade}`);
     
     const backendUrl = `https://projeto-site-routelab.onrender.com/api/destinos/${encodeURIComponent(cidade)}`;
     
     const response = await fetch(backendUrl);
-    const data = await response.json();
     
-    res.json(data);
-  } catch (error) {
-    console.error('Erro ao buscar dados de competitividade:', error);
-    res.status(500).json({ error: 'Erro ao conectar com o backend' });
-  }
-});
-// ✅ ROTA ROUTE (POST) - PROXY PARA BACKEND REAL
-app.post('/api/route', async (req, res) => {
-  try {
-    const { origin, destination } = req.body;
-    console.log(`📞 Rota /api/route - ${origin} → ${destination}`);
+    if (!response.ok) {
+      throw new Error(`Backend respondeu com status: ${response.status}`);
+    }
     
-    const backendUrl = 'https://projeto-site-routelab.onrender.com/route';
+    const backendData = await response.json();
+    console.log('✅ Dados recebidos do backend:', backendData);
     
-    const response = await fetch(backendUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ origin, destination })
+    // ✅ Garantir que todos os campos existam
+    const frontendData = {
+      abrangencia: backendData.abrangencia || 0,
+      economia_media: backendData.economia_media || 0,
+      co2_media: backendData.co2_media || 0,
+      tempo_medio: backendData.tempo_medio || 0,
+      total_destinos: backendData.total_destinos || 0,
+      destinos_competitivos: backendData.destinos_competitivos || 0,
+      top_economia: backendData.top_economia || [],
+      alerta_br319_count: backendData.alerta_br319_count || 0,
+      alerta_br319_exemplos: backendData.alerta_br319_exemplos || []
+      // corredores é ignorado pois o frontend não usa
+    };
+    
+    console.log('📊 Dados enviados para frontend:', {
+      cidade: cidade,
+      destinos: frontendData.destinos_competitivos,
+      economia: frontendData.economia_media
     });
     
-    const data = await response.json();
-    res.json(data);
+    res.json(frontendData);
+    
   } catch (error) {
-    console.error('Erro ao buscar rota:', error);
-    res.status(500).json({ error: 'Erro ao conectar com o backend' });
+    console.error('❌ Erro ao buscar dados de competitividade:', error);
+    res.status(500).json({ 
+      error: 'Erro ao conectar com o backend',
+      details: error.message 
+    });
   }
-}); 
+});
 
 // ✅ ROTAS ESPECÍFICAS PARA HTML - DEVEM VIR DEPOIS DO static
 app.get('/', (req, res) => {
