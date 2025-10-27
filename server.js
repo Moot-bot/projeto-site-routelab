@@ -11,7 +11,6 @@ app.use(express.urlencoded({ extended: true }));
 // Configuração CORS para produção e desenvolvimento
 app.use(cors({
   origin: [
-    'https://seu-site.vercel.app',
     'https://*.vercel.app',
     'http://localhost:3000',
     'http://localhost:8000'
@@ -21,7 +20,7 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
-// Servir arquivos estáticos
+// Servir arquivos estáticos - IMPORTANTE: deve vir ANTES das rotas específicas
 app.use(express.static(path.join(__dirname, 'static')));
 
 // Health check para Vercel
@@ -66,7 +65,7 @@ app.get('/api/competitividade/:cidade', async (req, res) => {
   }
 });
 
-// Rota para páginas
+// ✅ ROTAS ESPECÍFICAS PARA HTML - DEVEM VIR DEPOIS DO static
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'static', 'index.html'));
 });
@@ -75,7 +74,7 @@ app.get('/competitividade', (req, res) => {
   res.sendFile(path.join(__dirname, 'static', 'competitividade.html'));
 });
 
-// Rota fallback para SPA (Single Page Application)
+// ✅ Rota fallback para SPA - IMPORTANTE PARA VERCEL
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'static', 'index.html'));
 });
@@ -89,11 +88,9 @@ app.use((error, req, res, next) => {
 // Configuração da porta para Vercel
 const PORT = process.env.PORT || 3000;
 
-// Inicialização do servidor apenas se não estiver no ambiente Vercel
-if (require.main === module) {
-  app.listen(PORT, () => {
-    console.log(`Servidor rodando na porta ${PORT}`);
-  });
-}
+// Inicialização do servidor
+app.listen(PORT, () => {
+  console.log(`Servidor rodando na porta ${PORT}`);
+});
 
 module.exports = app;
