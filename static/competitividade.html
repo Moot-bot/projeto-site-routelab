@@ -227,54 +227,55 @@
     });
 
     function carregarInsights() {
-      const origem = document.getElementById('origemSelect').value;
-      if (!origem) return;
+  const origem = document.getElementById('origemSelect').value;
+  if (!origem) return;
 
-      fetch(`/api/destinos/${encodeURIComponent(origem)}`)
-        .then(r => {
-          if (!r.ok) throw new Error('Origem não encontrada ou erro no servidor');
-          return r.json();
-        })
-        .then(data => {
-          document.getElementById('abrangencia').textContent = `${data.destinos_competitivos}/${data.total_destinos} (${data.abrangencia}%)`;
-          document.getElementById('economiaMedia').textContent = `${data.economia_media}%`;
-          document.getElementById('co2Media').textContent = `${data.co2_media} t`;
-          document.getElementById('tempoMedio').textContent = `${Math.round(data.tempo_medio)} h`;
+  // ✅ CORREÇÃO: mudar de '/api/destinos' para '/api/competitividade'
+  fetch(`/api/competitividade/${encodeURIComponent(origem)}`)
+    .then(r => {
+      if (!r.ok) throw new Error('Origem não encontrada ou erro no servidor');
+      return r.json();
+    })
+    .then(data => {
+      document.getElementById('abrangencia').textContent = `${data.destinos_competitivos}/${data.total_destinos} (${data.abrangencia}%)`;
+      document.getElementById('economiaMedia').textContent = `${data.economia_media}%`;
+      document.getElementById('co2Media').textContent = `${data.co2_media} t`;
+      document.getElementById('tempoMedio').textContent = `${Math.round(data.tempo_medio)} h`;
 
-          // Alerta BR-319
-          const alertaDiv = document.getElementById('alertaBr319');
-          if (data.alerta_br319_count > 0) {
-            alertaDiv.innerHTML = `Em <strong>${data.alerta_br319_count}</strong> destinos, a BR-319 reduziria o custo rodoviário em mais de 15%.<br>Ex: ${data.alerta_br319_exemplos.join(', ')}.`;
-          } else {
-            alertaDiv.textContent = "Nenhum destino afetado.";
-          }
+      // Alerta BR-319
+      const alertaDiv = document.getElementById('alertaBr319');
+      if (data.alerta_br319_count > 0) {
+        alertaDiv.innerHTML = `Em <strong>${data.alerta_br319_count}</strong> destinos, a BR-319 reduziria o custo rodoviário em mais de 15%.<br>Ex: ${data.alerta_br319_exemplos.join(', ')}.`;
+      } else {
+        alertaDiv.textContent = "Nenhum destino afetado.";
+      }
 
-          // Gráfico de barras
-          if (barChart) barChart.destroy();
-          const barCtx = document.getElementById('barChart').getContext('2d');
-          barChart = new Chart(barCtx, {
-            type: 'bar',
-            data: {
-              labels: data.top_economia.map(d => `${d.destinationName} (${d.destinationUf})`),
-              datasets: [{
-                label: 'Economia (%)',
-                data: data.top_economia.map(d => d.economia_pct),
-                backgroundColor: 'rgba(52, 152, 219, 0.7)'
-              }]
-            },
-            options: {
-              indexAxis: 'y',
-              responsive: true,
-              plugins: { legend: { display: false } },
-              scales: { x: { beginAtZero: true, max: 40 } }
-            }
-          });
-        })
-        .catch(err => {
-          console.error(err);
-          alert('Erro ao carregar insights: ' + err.message);
-        });
-    }
+      // Gráfico de barras
+      if (barChart) barChart.destroy();
+      const barCtx = document.getElementById('barChart').getContext('2d');
+      barChart = new Chart(barCtx, {
+        type: 'bar',
+        data: {
+          labels: data.top_economia.map(d => `${d.destinationName} (${d.destinationUf})`),
+          datasets: [{
+            label: 'Economia (%)',
+            data: data.top_economia.map(d => d.economia_pct),
+            backgroundColor: 'rgba(52, 152, 219, 0.7)'
+          }]
+        },
+        options: {
+          indexAxis: 'y',
+          responsive: true,
+          plugins: { legend: { display: false } },
+          scales: { x: { beginAtZero: true, max: 40 } }
+        }
+      });
+    })
+    .catch(err => {
+      console.error(err);
+      alert('Erro ao carregar insights: ' + err.message);
+    });
+}
 
     function limparSelecao() {
       document.getElementById('origemSelect').value = '';
