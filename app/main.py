@@ -1,5 +1,5 @@
 from fastapi import FastAPI, HTTPException
-from .database import load_data, db, cities
+from .database import load_data, load_cities_geo, db, cities
 from .schemas import RouteRequest, RouteResponse, CitiesResponse
 from fastapi.staticfiles import StaticFiles
 import os
@@ -10,9 +10,26 @@ from fastapi.responses import HTMLResponse
 
 # Configuração do arquivo de dados
 DATA_DIR = Path("data")
+CITIES_FILE = DATA_DIR / "cidade.csv"
 DATA_FILE = DATA_DIR / "dados.csv"  # ← agora é CSV!
 GITHUB_RELEASE_URL = "https://github.com/Moot-bot/Routelab/releases/download/v1.0/dados.csv"
+GITHUB_CITIES_URL = "https://github.com/Moot-bot/Routelab/releases/download/v1.1/cidade.csv"
 
+def ensure_cities_file():
+    if not CITIES_FILE.exists():
+        print("📥 Baixando cidades do GitHub Releases...")
+        try:
+            response = requests.get(GITHUB_CITIES_URL, stream=True)
+            response.raise_for_status()
+            if "text/html" in response.headers.get("content-type", ""):
+                raise Exception("Erro: Recebido HTML em vez de CSV")
+            with open(CITIES_FILE, "wb") as f:
+                for chunk in response.iter_content(chunk_size=8192):
+                    f.write(chunk)
+            print(f"✅ Arquivo baixado: {CITIES_FILE.name}")
+        except Exception as e:
+            print(f"❌ Erro ao baixar cidades: {e}")
+            raise
 def ensure_data_file():
     """Baixa o arquivo CSV do GitHub Releases se não existir."""
     if not DATA_FILE.exists():
@@ -36,8 +53,9 @@ def ensure_data_file():
             print(f"❌ Erro ao baixar: {e}")
             raise
 
-# 👇 Executa ANTES de qualquer outra coisa
-ensure_data_file()
+def ensure_data_files():
+    ensure_data_file()      # dados.csv
+    ensure_cities_file()    # cidades.csv
 
 app = FastAPI(title="Consulta de Rotas Logísticas", version="1.0")
 
@@ -45,8 +63,8 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "http://localhost:8000",
-        "https://projeto-site-routelab.vercel.app"  # ← URL exata do seu frontend
-    ],
+        "https://projeto-site-routelab.vercel.app"
+],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -58,7 +76,15 @@ app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 
 @app.on_event("startup")
 async def startup_event():
-    load_data()
+    ensure_data_files()
+    load_data()  # que carrega dados.csv
+    load_cities_geo()  # nova função (veja abaixo)
+
+from .database import CITIES_GEO
+
+@app.get("/city-coords")
+def get_city_coords():
+    return CITIES_GEO
 
 @app.get("/", response_class=HTMLResponse)
 async def serve_frontend():
