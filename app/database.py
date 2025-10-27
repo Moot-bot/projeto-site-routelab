@@ -71,7 +71,14 @@ def load_data():
         'isLG10%',
         'isML10%',
         'isNC10%',
-    ]
+        'pathTotalCostWithoutBR319',
+        'pathTotalCost2',        # Armador AL
+        'pathTotalCostLG',       # Armador LG
+        'pathTotalCostML',       # Armador ML
+        'pathTotalCostNC',       # Armador NC
+        'originalCost',
+        'withBR319Cost'
+        ]
 
     df = pd.read_csv(
         CSV_PATH,
@@ -81,7 +88,18 @@ def load_data():
         sep=';',
         decimal=','
     )
+    colunas_custo = [
+    'pathTotalCostWithoutBR319',
+    'pathTotalCost2',
+    'pathTotalCostLG',
+    'pathTotalCostML',
+    'pathTotalCostNC',
+    'originalCost',
+    'withBR319Cost'
+]
 
+    for col in colunas_custo:
+        df[col] = pd.to_numeric(df[col], errors='coerce').astype('float32')
     colunas_numericas = [
         'pathDistanceWithoutBR319',
         'pathTransitTimeWithoutBR319',

@@ -3,253 +3,343 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Modelo de Competitividade da Cabotagem</title>
+  <title>RouteLab — Modelo de Competitividade da Cabotagem em relação ao Modal Rodoviário</title>
 
   <!-- Leaflet (Mapa) -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css  " />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js  "></script>
 
   <!-- Chart.js -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js  "></script>
 
   <style>
+    :root {
+      --primary: #007bff;
+      --success: #28a745;
+      --danger: #dc3545;
+      --warning: #ffc107;
+      --light: #f8f9fa;
+      --dark: #343a40;
+      --blue-dark: #1e6dbb;
+      --purple-bg: #e6e6fa;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
     body {
-      font-family: 'Segoe UI', sans-serif;
+      font-family: 'Segoe UI', system-ui, sans-serif;
       margin: 0;
       padding: 0;
       background: #f5f7fa;
       color: #333;
+      line-height: 1.6;
     }
 
-    .header {
-      background: #007bff;
+    /* Navbar fixa */
+    .navbar {
+      background: var(--primary);
       color: white;
-      text-align: center;
-      padding: 10px 0;
-      font-size: 20px;
+      padding: 12px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+    }
+
+    .navbar .logo {
+      font-size: 1.4rem;
       font-weight: bold;
+    }
+
+    .navbar ul {
+      list-style: none;
+      display: flex;
+      gap: 20px;
+      margin: 0;
+      padding: 0;
+    }
+
+    .navbar a {
+      color: white;
+      text-decoration: none;
+      font-weight: 500;
+      font-size: 0.95rem;
+    }
+
+    .navbar a:hover {
+      text-decoration: underline;
     }
 
     .container {
       display: grid;
       grid-template-columns: 1fr 2fr 1fr;
-      gap: 10px;
-      padding: 10px;
-      max-width: 1200px;
+      gap: 16px;
+      padding: 16px;
+      max-width: 1400px;
       margin: 0 auto;
     }
 
+    @media (max-width: 992px) {
+      .container {
+        grid-template-columns: 1fr;
+        padding: 12px;
+      }
+      .col-purple {
+        order: -1; /* Mapa no topo em mobile */
+      }
+    }
+
     .col-blue {
-      background: #1e6dbb;
+      background: var(--blue-dark);
       color: white;
-      padding: 15px;
-      border-radius: 5px;
+      padding: 20px;
+      border-radius: 8px;
       font-size: 14px;
-      line-height: 1.6;
+      line-height: 1.7;
+    }
+
+    .col-blue a {
+      color: #a0d4ff;
+      text-decoration: underline;
     }
 
     .col-green {
-      background: #d4f0d4;
-      padding: 15px;
-      border-radius: 5px;
+      background: #f0f8f0;
+      padding: 20px;
+      border-radius: 8px;
       font-size: 14px;
     }
 
     .col-purple {
-      background: #e6e6fa;
+      background: var(--purple-bg);
       padding: 0;
-      border-radius: 5px;
+      border-radius: 8px;
       overflow: hidden;
       display: flex;
       flex-direction: column;
     }
 
     .col-purple #map {
-      height: 450px;
+      height: 500px;
       width: 100%;
       border: none;
       flex-grow: 1;
     }
 
+    @media (max-width: 768px) {
+      .col-purple #map {
+        height: 350px;
+      }
+    }
+
     .footer-contact {
-      background: #28a745;
+      background: var(--success);
       color: white;
       text-align: center;
-      padding: 8px;
+      padding: 10px;
       font-size: 14px;
       width: 100%;
       box-sizing: border-box;
+      font-weight: 500;
     }
 
     h2 {
-      color: #000;
+      color: var(--dark);
       margin-top: 20px;
-      margin-bottom: 10px;
+      margin-bottom: 12px;
       font-size: 18px;
       font-weight: bold;
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
 
     .input-container {
       display: flex;
-      gap: 10px;
-      margin-bottom: 15px;
+      gap: 12px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
     }
 
     .input-container input {
       flex: 1;
-      padding: 10px;
+      min-width: 140px;
+      padding: 12px;
       border: 1px solid #ddd;
-      border-radius: 5px;
-      font-size: 14px;
-      background: yellow;
+      border-radius: 6px;
+      font-size: 15px;
+      background: white;
     }
 
     button {
-      padding: 8px 12px;
-      margin: 5px 0;
+      padding: 10px 16px;
+      margin: 6px 0;
       width: 100%;
       border: none;
-      border-radius: 5px;
-      font-size: 14px;
+      border-radius: 6px;
+      font-size: 15px;
+      font-weight: 600;
       cursor: pointer;
+      transition: background 0.2s;
     }
 
-    #consultar { background: #007bff; color: white; }
+    #consultar { background: var(--primary); color: white; }
     #consultar:hover { background: #0056b3; }
     #limpar { background: #6c757d; color: white; }
+    #limpar:hover { background: #5a6268; }
     #salvar-grafico { 
-      background: #28a745; 
+      background: var(--success); 
       color: white; 
-      margin-top: 10px; 
+      margin-top: 16px; 
       display: none;
     }
+    #salvar-grafico:hover { background: #218838; }
 
     .armador-card {
-      background: #fff;
-      padding: 10px;
-      border-radius: 5px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      background: white;
+      padding: 14px;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
       text-align: center;
-      margin: 5px;
-      min-height: 80px;
+      margin: 8px;
+      min-height: 90px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      transition: transform 0.2s;
+    }
+
+    .armador-card:hover {
+      transform: translateY(-2px);
     }
 
     .armador-card.competitivo {
-      background: #d4f0d4;
-      border: 2px solid #28a745;
+      background: #e8f5e8;
+      border: 2px solid var(--success);
     }
 
     .armador-card.nao-competitivo {
-      background: #ffebee;
-      border: 2px solid #f44336;
-      color: #c62828;
+      background: #ffeaea;
+      border: 2px solid var(--danger);
+      color: #c00;
     }
 
     .armador-icon {
-      font-size: 24px;
-      margin-bottom: 5px;
+      font-size: 28px;
+      margin-bottom: 6px;
     }
 
     .chart-container {
-      margin-top: 15px;
-      height: 250px;
+      margin-top: 20px;
+      height: 280px;
       position: relative;
     }
 
     .info-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-      gap: 10px;
-      margin-top: 10px;
+      grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+      gap: 12px;
+      margin-top: 12px;
     }
 
     .info-item {
-      background: #fff;
-      padding: 8px;
-      border-radius: 5px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      background: white;
+      padding: 12px;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
       text-align: center;
     }
 
     .info-item label {
       font-weight: bold;
       font-size: 12px;
-      color: #7f8c8d;
+      color: #666;
+      display: block;
+      margin-bottom: 4px;
     }
 
     .info-item span {
-      font-size: 14px;
-    }
-
-    .emissao-box {
-      background: #fff;
-      padding: 8px;
-      border-radius: 5px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-      text-align: center;
-      margin: 5px;
-    }
-
-    .emissao-box label {
-      font-weight: bold;
-      font-size: 12px;
-      color: #7f8c8d;
-      display: block;
-    }
-
-    .emissao-box span {
-      font-size: 14px;
+      font-size: 16px;
+      font-weight: 600;
     }
 
     .visitante-sep {
-      margin-top: 20px;
-      padding-top: 10px;
-      border-top: 2px solid rgba(255,255,255,0.3);
+      margin-top: 24px;
+      padding-top: 16px;
+      border-top: 2px solid rgba(255,255,255,0.4);
       font-weight: bold;
     }
 
     .dados-titulo {
-      font-size: 16px;
+      font-size: 18px;
       font-weight: bold;
-      color: #000;
-      margin-top: 15px;
-      margin-bottom: 5px;
+      color: var(--dark);
+      margin-top: 18px;
+      margin-bottom: 10px;
       text-align: center;
     }
 
-    .coordenadas {
-      font-size: 12px;
-      color: #555;
-      margin: 5px 0;
-      padding: 5px;
-      background: #f9f9f9;
-      border-radius: 5px;
-      text-align: center;
+    .historico-box {
+      margin-top: 20px;
+      padding: 12px;
+      background: rgba(0,0,0,0.1);
+      border-radius: 6px;
     }
 
-    /* Estilização do mapa */
-    .leaflet-container {
-      background: #e6e6fa;
-      border: 1px solid #ccc;
+    .historico-box h3 {
+      margin-top: 0;
+      font-size: 16px;
+    }
+
+    .historico-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      max-height: 120px;
+      overflow-y: auto;
+    }
+
+    .historico-list li {
+      padding: 6px 0;
+      font-size: 13px;
+      border-bottom: 1px solid rgba(255,255,255,0.2);
+    }
+
+    .historico-list li:last-child {
+      border-bottom: none;
     }
   </style>
 </head>
 <body>
-  <div class="header">
-    Modelo de Competitividade da Cabotagem em relação ao Modal Rodoviário
-  </div>
+
+  <!-- Navbar fixa -->
+  <nav class="navbar">
+    <div class="logo">RouteLab - Modelo de Competitividade da Cabotagem em relação ao Modal Rodoviário</div>
+    <ul>
+      <li><a href="static/competitividade.html">🔽 Análise das Cidades</a></li>
+    </ul>
+  </nav>
 
   <div class="container">
-    <!-- Coluna 1: Informações e Visitantes -->
+    <!-- Coluna 1: Informações -->
     <div class="col-blue">
       <p>
         Este aplicativo é resultado da pesquisa publicada no artigo 
         <strong>"Brazilian maritime containerized cabotage competitiveness assessment based on a multimodal super network"</strong>. 
-        O artigo está disponível em <a href="https://doi.org/10.1016/j.jtrangeo.2024.104062" style="color:white; text-decoration:underline;">https://doi.org/10.1016/j.jtrangeo.2024.104062</a>.
+        O artigo está disponível em 
+        <a href="https://doi.org/10.1016/j.jtrangeo.2024.104062  " target="_blank">
+          https://doi.org/10.1016/j.jtrangeo.2024.104062  
+        </a>.
       </p>
       <br>
       <p>
-        Com objetivo promover o modal Cabotagem em sua região de competitividade, este aplicativo verifica se o Cabotagem é mais competitiva que o modal Rodoviário para as 637 Cidades com mais de 50 mil habitantes.
+        Com objetivo promover o modal Cabotagem em sua região de competitividade, este aplicativo verifica se a Cabotagem é mais competitiva que o modal Rodoviário para as 637 cidades com mais de 50 mil habitantes.
       </p>
       <br>
       <p>
@@ -257,19 +347,25 @@
       </p>
 
       <div class="visitante-sep">
-        <h2>Agradecemos sua visita. Você é o Visitante número:</h2>
-        <div style="font-size: 24px; font-weight: bold; margin-top: 5px;">
+        <h2>Visitantes</h2>
+        <div style="font-size: 28px; font-weight: bold; margin-top: 8px;">
           <span id="visitantes">0</span>
         </div>
       </div>
+
+      <!-- Histórico de consultas -->
+      <div class="historico-box">
+        <h3>🔍 Consultas Recentes</h3>
+        <ul id="historico-list" class="historico-list"></ul>
+      </div>
     </div>
 
-    <!-- Coluna 2: Formulário, Resultado, Gráfico -->
+    <!-- Coluna 2: Formulário + Resultados -->
     <div class="col-green">
-      <h2>🔍 Selecione as cidades de origem e destino</h2>
+      <h2>📍 Selecione as cidades de origem e destino</h2>
       <div class="input-container">
-        <input list="cidades" id="origem" placeholder="Origem" />
-        <input list="cidades" id="destino" placeholder="Destino" />
+        <input list="cidades" id="origem" placeholder="Cidade de origem" autocomplete="off" />
+        <input list="cidades" id="destino" placeholder="Cidade de destino" autocomplete="off" />
       </div>
 
       <button id="consultar" onclick="consultar()">Consultar Rota</button>
@@ -287,38 +383,36 @@
             <span id="tempo">-</span>
           </div>
           <div class="info-item">
-            <label>Emissão CO₂ — Padrão</label>
+            <label>CO₂ — Padrão</label>
             <span id="emissao_padrao">-</span> <small>kg</small>
           </div>
         </div>
 
-      
-
         <h2>🚢 Competitividade dos Armadores</h2>
         <div class="info-grid">
           <div class="armador-card" id="armador1">
-            <div class="armador-icon">✅</div>
+            <div class="armador-icon">1️⃣</div>
             <div>Armador 1</div>
-            <div id="status1">Competitivo</div>
+            <div id="status1">-</div>
           </div>
           <div class="armador-card" id="armador2">
-            <div class="armador-icon">✅</div>
+            <div class="armador-icon">2️⃣</div>
             <div>Armador 2</div>
-            <div id="status2">Competitivo</div>
+            <div id="status2">-</div>
           </div>
           <div class="armador-card" id="armador3">
-            <div class="armador-icon">✅</div>
+            <div class="armador-icon">3️⃣</div>
             <div>Armador 3</div>
-            <div id="status3">Competitivo</div>
+            <div id="status3">-</div>
           </div>
           <div class="armador-card" id="armador4">
-            <div class="armador-icon">✅</div>
+            <div class="armador-icon">4️⃣</div>
             <div>Armador 4</div>
-            <div id="status4">Competitivo</div>
+            <div id="status4">-</div>
           </div>
         </div>
 
-        <h2>📊 Comparação de Emissões de CO₂eq (ton)</h2>
+        <h2>📊 Comparação de Emissões de CO₂ (kg)</h2>
         <div class="chart-container">
           <canvas id="emissionsChart"></canvas>
         </div>
@@ -327,7 +421,7 @@
       <button id="salvar-grafico" onclick="salvarGrafico()">📥 Salvar Gráfico</button>
     </div>
 
-    <!-- Coluna 3: Mapa + Contato -->
+    <!-- Coluna 3: Mapa -->
     <div class="col-purple">
       <div id="map"></div>
       <div class="footer-contact">
@@ -339,26 +433,38 @@
   <datalist id="cidades"></datalist>
 
   <script>
-    // Contador total de visitantes
+    // Contador de visitantes
     let totalVisitas = parseInt(localStorage.getItem('totalVisitas') || '0') + 1;
     localStorage.setItem('totalVisitas', totalVisitas);
-    document.getElementById('visitantes').textContent = totalVisitas;
+    document.getElementById('visitantes').textContent = totalVisitas.toLocaleString('pt-BR');
+
+    // Carregar histórico
+    function carregarHistorico() {
+      const historico = JSON.parse(localStorage.getItem('routelab_historico') || '[]');
+      const list = document.getElementById('historico-list');
+      list.innerHTML = '';
+      historico.slice(-5).reverse().forEach(item => {
+        const li = document.createElement('li');
+        li.textContent = `${item.origem} → ${item.destino}`;
+        list.appendChild(li);
+      });
+    }
+    carregarHistorico();
 
     const API_BASE = window.location.hostname === 'localhost' 
       ? 'http://localhost:8000' 
-      : 'https://projeto-site-routelab.onrender.com';
+      : 'https://projeto-site-routelab.onrender.com  ';
 
     let allCities = [];
 
     fetch(`${API_BASE}/cities`)
       .then(r => r.json())
       .then(data => {
-        allCities = data.cities;
+        allCities = data.cities || [];
         updateDatalist(allCities);
       })
       .catch(err => {
         console.error('Erro ao carregar cidades:', err);
-        alert('Erro ao conectar ao servidor.');
       });
 
     function updateDatalist(cities) {
@@ -375,10 +481,13 @@
       document.getElementById('origem').value = '';
       document.getElementById('destino').value = '';
       document.getElementById('resultado').style.display = 'none';
-      document.getElementById('map').style.display = 'none';
       document.getElementById('salvar-grafico').style.display = 'none';
       const existingChart = Chart.getChart('emissionsChart');
       if (existingChart) existingChart.destroy();
+      if (window.rotaMap) {
+        window.rotaMap.remove();
+        delete window.rotaMap;
+      }
     }
 
     async function consultar() {
@@ -390,8 +499,13 @@
         return;
       }
 
+      // Salvar no histórico
+      const historico = JSON.parse(localStorage.getItem('routelab_historico') || '[]');
+      historico.push({ origem: origemInput, destino: destinoInput, data: new Date().toISOString() });
+      localStorage.setItem('routelab_historico', JSON.stringify(historico.slice(-10)));
+      carregarHistorico();
+
       document.getElementById('resultado').style.display = 'block';
-      document.getElementById('map').style.display = 'none';
       document.getElementById('salvar-grafico').style.display = 'none';
 
       try {
@@ -405,16 +519,13 @@
 
         const data = await response.json();
 
-        if (data.success) {
+        if (data.success && data.info) {
           const info = data.info;
-          console.log("🔍 Dados recebidos do backend:", info);
-          // Atualizar dados visuais
-          document.getElementById('distancia').textContent = info.pathDistanceWithoutBR319?.toFixed(2) || '-';
-          document.getElementById('tempo').textContent = info.pathTransitTimeWithoutBR319?.toFixed(2) || '-';
-          document.getElementById('emissao_padrao').textContent = info.emissao_sem_br319?.toFixed(2) || '-';
 
-          
-          // Atualizar competitividade dos armadores
+          document.getElementById('distancia').textContent = (info.pathDistanceWithoutBR319 || 0).toFixed(2);
+          document.getElementById('tempo').textContent = (info.pathTransitTimeWithoutBR319 || 0).toFixed(2);
+          document.getElementById('emissao_padrao').textContent = (info.emissao_sem_br319 || 0).toFixed(2);
+
           const armadores = [
             { id: 'armador1', statusId: 'status1', flag: info.isAL10 },
             { id: 'armador2', statusId: 'status2', flag: info.isLG10 },
@@ -425,12 +536,11 @@
           armadores.forEach(a => {
             const card = document.getElementById(a.id);
             const status = document.getElementById(a.statusId);
+            card.classList.remove('competitivo', 'nao-competitivo');
             if (a.flag) {
               card.classList.add('competitivo');
-              card.classList.remove('nao-competitivo');
               status.textContent = 'Competitivo';
             } else {
-              card.classList.remove('competitivo');
               card.classList.add('nao-competitivo');
               status.textContent = 'Não competitivo';
             }
@@ -461,25 +571,22 @@
         info.emissao_lg || 0,
         info.emissao_ml || 0,
         info.emissao_nc || 0
-      ];
-
-      const safeValues = values.map(v => {
-        const num = parseFloat(v);
-        return isNaN(num) ? 0 : num;
-      });
-
-      const labels = ['Rodoviário', '1', '2', '3', '4'];
-      const colors = ['#ff6384', '#36a2eb', '#ffce56', '#4bc0c0', '#9966ff'];
+      ].map(v => parseFloat(v) || 0);
 
       new Chart(ctx, {
         type: 'bar',
         data: {
-          labels: labels,
+          labels: ['Rodoviário', 'Armador 1', 'Armador 2', 'Armador 3', 'Armador 4'],
           datasets: [{
             label: 'Emissões de CO₂ (kg)',
-            data: safeValues,
-            backgroundColor: colors,
-            borderColor: colors.map(c => c.replace('ff', 'cc')),
+            data: values,
+            backgroundColor: [
+              '#ff6b6b',
+              '#4ecdc4',
+              '#45b7d1',
+              '#96ceb4',
+              '#f9ca24'
+            ],
             borderWidth: 1
           }]
         },
@@ -491,8 +598,13 @@
             tooltip: {
               callbacks: {
                 label: (context) => {
-                  const value = context.raw?.toFixed(2) || '0';
-                  return `${context.label}: ${value} kg`;
+                  const value = context.raw.toFixed(2);
+                  const time = ['-', info.tempo_al, info.tempo_lg, info.tempo_ml, info.tempo_nc][context.dataIndex];
+                  const custo = ['-', info.custo_al, info.custo_lg, info.custo_ml, info.custo_nc][context.dataIndex];
+                  let extra = '';
+                  if (time) extra += `\nTempo: ${parseFloat(time).toFixed(1)} h`;
+                  if (custo) extra += `\nCusto: R$ ${parseFloat(custo).toFixed(0)}`;
+                  return `${context.label}: ${value} kg${extra}`;
                 }
               }
             }
@@ -501,9 +613,6 @@
             y: {
               beginAtZero: true,
               title: { display: true, text: 'Emissões de CO₂ (kg)' }
-            },
-            x: {
-              title: { display: true, text: 'Armadores' }
             }
           }
         }
@@ -513,15 +622,13 @@
     function salvarGrafico() {
       const canvas = document.getElementById('emissionsChart');
       const link = document.createElement('a');
-      link.download = 'emissoes-co2-routelab.png';
+      link.download = `routelab-co2-${new Date().toISOString().slice(0,10)}.png`;
       link.href = canvas.toDataURL('image/png');
       link.click();
     }
 
     function mostrarMapa(info) {
       const mapDiv = document.getElementById('map');
-      mapDiv.style.display = 'block';
-
       if (window.rotaMap) {
         window.rotaMap.remove();
       }
@@ -535,14 +642,14 @@
 
       if (info.originLat != null && info.originLon != null) {
         L.marker([info.originLat, info.originLon])
-          .bindPopup(`<b>Origem</b><br>(${info.originLat.toFixed(4)}, ${info.originLon.toFixed(4)})`)
+          .bindPopup(`<b>Origem</b><br>${info.origin}<br>(${info.originLat.toFixed(4)}, ${info.originLon.toFixed(4)})`)
           .addTo(map);
         boundsArray.push([info.originLat, info.originLon]);
       }
 
       if (info.destinationLat != null && info.destinationLon != null) {
         L.marker([info.destinationLat, info.destinationLon])
-          .bindPopup(`<b>Destino</b><br>(${info.destinationLat.toFixed(4)}, ${info.destinationLon.toFixed(4)})`)
+          .bindPopup(`<b>Destino</b><br>${info.destination}<br>(${info.destinationLat.toFixed(4)}, ${info.destinationLon.toFixed(4)})`)
           .addTo(map);
         boundsArray.push([info.destinationLat, info.destinationLon]);
       }
@@ -550,13 +657,12 @@
       if (boundsArray.length === 2) {
         L.polyline(boundsArray, {
           color: '#e74c3c',
-          weight: 3,
-          opacity: 0.8,
-          dashArray: '8,6'
+          weight: 4,
+          opacity: 0.9
         }).addTo(map);
         map.fitBounds(L.latLngBounds(boundsArray).pad(0.2));
       } else if (boundsArray.length > 0) {
-        map.fitBounds(L.latLngBounds(boundsArray).pad(0.3));
+        map.setView(boundsArray[0], 6);
       }
 
       window.rotaMap = map;
