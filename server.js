@@ -45,6 +45,23 @@ app.get('/api/cidades', async (req, res) => {
 });
 
 // Rota para dados de competitividade
+app.get('/cities', async (req, res) => {
+  try {
+    console.log('📞 Rota /cities foi chamada');
+    const cidades = [
+      { id: 1, nome: 'São Paulo' },
+      { id: 2, nome: 'Rio de Janeiro' },
+      { id: 3, nome: 'Santos' }
+    ];
+    // ✅ Formato correto: { cities: array }
+    res.json({ 
+      cities: cidades.map(c => c.nome) 
+    });
+  } catch (error) {
+    console.error('Erro em /cities:', error);
+    res.status(500).json({ error: 'Erro interno do servidor' });
+  }
+});
 app.get('/api/competitividade/:cidade', async (req, res) => {
   try {
     const { cidade } = req.params;
