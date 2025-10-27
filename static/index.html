@@ -410,18 +410,13 @@
 
         if (data.success) {
           const info = data.info;
-
+          console.log("🔍 Dados recebidos do backend:", info);
           // Atualizar dados visuais
           document.getElementById('distancia').textContent = info.pathDistanceWithoutBR319?.toFixed(2) || '-';
           document.getElementById('tempo').textContent = info.pathTransitTimeWithoutBR319?.toFixed(2) || '-';
           document.getElementById('emissao_padrao').textContent = info.emissao_sem_br319?.toFixed(2) || '-';
 
-          // Atualizar coordenadas
-          document.getElementById('origem_lat').textContent = info.originLat != null ? info.originLat.toFixed(6) : '-';
-          document.getElementById('origem_lon').textContent = info.originLon != null ? info.originLon.toFixed(6) : '-';
-          document.getElementById('destino_lat').textContent = info.destinationLat != null ? info.destinationLat.toFixed(6) : '-';
-          document.getElementById('destino_lon').textContent = info.destinationLon != null ? info.destinationLon.toFixed(6) : '-';
-
+         
           // Atualizar competitividade dos armadores
           const armadores = [
             { id: 'armador1', statusId: 'status1', flag: info.isAL10 },
