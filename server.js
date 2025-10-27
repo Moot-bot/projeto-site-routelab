@@ -28,59 +28,82 @@ app.get('/health', (req, res) => {
   res.status(200).json({ status: 'OK', message: 'Server is running' });
 });
 
-// Suas rotas API aqui...
-app.get('/api/cidades', async (req, res) => {
+app.get('/cities', async (req, res) => {
   try {
-    // Simulação de dados - substitua com sua lógica real
-    const cidades = [
-      { id: 1, nome: 'São Paulo' },
-      { id: 2, nome: 'Rio de Janeiro' },
-      { id: 3, nome: 'Santos' }
-    ];
-    res.json(cidades);
+    console.log('📞 Rota /cities foi chamada - conectando com backend real');
+    
+    // ✅ SUBSTITUA pela URL real do seu backend no Render
+    const backendUrl = 'https://projeto-site-routelab.onrender.com/cities';
+    
+    const response = await fetch(backendUrl);
+    const data = await response.json();
+    
+    res.json(data);
   } catch (error) {
-    console.error('Erro ao buscar cidades:', error);
-    res.status(500).json({ error: 'Erro interno do servidor' });
+    console.error('Erro ao buscar cidades do backend real:', error);
+    res.status(500).json({ error: 'Erro ao conectar com o backend' });
   }
 });
 
-// Rota para dados de competitividade
-app.get('/cities', async (req, res) => {
+// ✅ ROTA API CIDADES (se ainda for usada)
+app.get('/api/cidades', async (req, res) => {
   try {
-    console.log('📞 Rota /cities foi chamada');
-    const cidades = [
-      { id: 1, nome: 'São Paulo' },
-      { id: 2, nome: 'Rio de Janeiro' },
-      { id: 3, nome: 'Santos' }
-    ];
-    // ✅ Formato correto: { cities: array }
-    res.json({ 
-      cities: cidades.map(c => c.nome) 
-    });
+    console.log('📞 Rota /api/cidades - conectando com backend real');
+    
+    // ✅ SUBSTITUA pela URL real do seu backend no Render
+    const backendUrl = 'https://projeto-site-routelab.onrender.com/cities';
+    
+    const response = await fetch(backendUrl);
+    const data = await response.json();
+    
+    res.json(data);
   } catch (error) {
-    console.error('Erro em /cities:', error);
-    res.status(500).json({ error: 'Erro interno do servidor' });
+    console.error('Erro ao buscar cidades via /api/cidades:', error);
+    res.status(500).json({ error: 'Erro ao conectar com o backend' });
   }
 });
+
+
+// ✅ ROTA COMPETITIVIDADE - PROXY PARA BACKEND REAL  
 app.get('/api/competitividade/:cidade', async (req, res) => {
   try {
     const { cidade } = req.params;
-    // Simulação de dados - substitua com sua lógica real
-    const dados = {
-      cidade: cidade,
-      economia: 15.5,
-      reducaoCO2: 30.2,
-      destinos: [
-        { nome: 'Destino A', economia: 25 },
-        { nome: 'Destino B', economia: 18 }
-      ]
-    };
-    res.json(dados);
+    console.log(`📞 Rota /api/competitividade/${cidade} - conectando com backend real`);
+    
+    const backendUrl = `https://projeto-site-routelab.onrender.com/api/destinos/${encodeURIComponent(cidade)}`;
+    
+    const response = await fetch(backendUrl);
+    const data = await response.json();
+    
+    res.json(data);
   } catch (error) {
     console.error('Erro ao buscar dados de competitividade:', error);
-    res.status(500).json({ error: 'Erro interno do servidor' });
+    res.status(500).json({ error: 'Erro ao conectar com o backend' });
   }
 });
+// ✅ ROTA ROUTE (POST) - PROXY PARA BACKEND REAL
+app.post('/api/route', async (req, res) => {
+  try {
+    const { origin, destination } = req.body;
+    console.log(`📞 Rota /api/route - ${origin} → ${destination}`);
+    
+    const backendUrl = 'https://projeto-site-routelab.onrender.com/route';
+    
+    const response = await fetch(backendUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ origin, destination })
+    });
+    
+    const data = await response.json();
+    res.json(data);
+  } catch (error) {
+    console.error('Erro ao buscar rota:', error);
+    res.status(500).json({ error: 'Erro ao conectar com o backend' });
+  }
+}); 
 
 // ✅ ROTAS ESPECÍFICAS PARA HTML - DEVEM VIR DEPOIS DO static
 app.get('/', (req, res) => {
