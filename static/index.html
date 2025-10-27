@@ -6,11 +6,11 @@
   <title>RouteLab — Modelo de Competitividade da Cabotagem em relação ao Modal Rodoviário</title>
 
   <!-- Leaflet (Mapa) -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css  " />
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js  "></script>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
   <!-- Chart.js -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js  "></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <style>
     :root {
@@ -333,8 +333,8 @@
         Este aplicativo é resultado da pesquisa publicada no artigo 
         <strong>"Brazilian maritime containerized cabotage competitiveness assessment based on a multimodal super network"</strong>. 
         O artigo está disponível em 
-        <a href="https://doi.org/10.1016/j.jtrangeo.2024.104062  " target="_blank">
-          https://doi.org/10.1016/j.jtrangeo.2024.104062  
+        <a href="https://doi.org/10.1016/j.jtrangeo.2024.104062" target="_blank">
+          https://doi.org/10.1016/j.jtrangeo.2024.104062
         </a>.
       </p>
       <br>
@@ -451,9 +451,11 @@
     }
     carregarHistorico();
 
-    const API_BASE = window.location.hostname === 'localhost' 
-      ? 'http://localhost:8000' 
-      : 'https://projeto-site-routelab.onrender.com  ';
+    // ✅ CORREÇÃO: URL da API sem espaços
+   const API_BASE = 
+  window.location.hostname.includes('localhost')
+    ? 'http://localhost:8000'
+    : 'https://projeto-site-routelab.onrender.com';
 
     let allCities = [];
 
@@ -599,12 +601,7 @@
               callbacks: {
                 label: (context) => {
                   const value = context.raw.toFixed(2);
-                  const time = ['-', info.tempo_al, info.tempo_lg, info.tempo_ml, info.tempo_nc][context.dataIndex];
-                  const custo = ['-', info.custo_al, info.custo_lg, info.custo_ml, info.custo_nc][context.dataIndex];
-                  let extra = '';
-                  if (time) extra += `\nTempo: ${parseFloat(time).toFixed(1)} h`;
-                  if (custo) extra += `\nCusto: R$ ${parseFloat(custo).toFixed(0)}`;
-                  return `${context.label}: ${value} kg${extra}`;
+                  return `${context.label}: ${value} kg`;
                 }
               }
             }

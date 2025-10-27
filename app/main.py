@@ -65,11 +65,7 @@ app = FastAPI(title="Consulta de Rotas Logísticas", version="1.0")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:8000",
-        "https://projeto-site-routelab.vercel.app",
-        "https://projeto-site-routelab.onrender.com",
-    ],
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
