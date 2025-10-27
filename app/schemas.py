@@ -17,6 +17,10 @@ class RouteInfo(BaseModel):
     emissao_lg: Optional[float]
     emissao_ml: Optional[float]
     emissao_nc: Optional[float]
+    originLat: float | None = None   # ← novo campo
+    originLon: float | None = None   # ← novo campo
+    destinationLat: float | None = None  # ← novo campo
+    destinationLon: float | None = None  # ← novo campo
     isAL10: bool
     isLG10: bool
     isML10: bool
