@@ -68,6 +68,7 @@ app.add_middleware(
     allow_origins=[
         "http://localhost:8000",
         "https://projeto-site-routelab.vercel.app"
+        "https://projeto-site-routelab.onrender.com",
     ],
     allow_credentials=True,
     allow_methods=["*"],
